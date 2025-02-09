@@ -1,146 +1,417 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart, Calendar, Star, List } from "lucide-react";
+import { useMood } from "@/contexts/MoodContext";
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Message</title>
-    <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #fff5f5;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            max-width: 600px;
-        }
-        .card {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        .title {
-            color: #ec4899;
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin: 2rem 0;
-        }
-        .yes-btn {
-            padding: 0.8rem 2rem;
-            font-size: 1.2rem;
-            background: #ec4899;
-            color: white;
-            border: none;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .no-btn {
-            padding: 0.8rem 2rem;
-            font-size: 1.2rem;
-            background: white;
-            color: #ec4899;
-            border: 2px solid #ec4899;
-            border-radius: 9999px;
-            cursor: pointer;
-        }
-        .message {
-            display: none;
-            animation: fadeIn 1s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .heart {
-            color: #ec4899;
-            font-size: 2rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card" id="question">
-            <h1 class="title">Will you be my forever valentine jikka? 💖</h1>
-            <div class="buttons">
-                <button class="yes-btn" onclick="showMessage()">Yes! ❤️</button>
-                <button class="no-btn" id="noBtn" onmouseover="moveButton()" onclick="handleNo()">No 💔</button>
-            </div>
-            <p id="noMessage" style="color: #ec4899; font-size: 1.2rem;"></p>
-        </div>
-        
-        <div class="card message" id="message">
-            <h2 class="title">My Dearest Jikka 💝</h2>
-            <p><em>"In your smile, I see something more beautiful than the stars."</em></p>
-            <p>Every moment with you feels like a dream come true. Your love has made my life complete, and I can't imagine walking this journey without you by my side.</p>
-            <p>You're not just my valentine, you're my best friend, my soulmate, and my everything. Thank you for making every day feel special just by being you.</p>
-            <p>I promise to love you more with each passing day, to cherish every moment we share, and to always be there for you, in sunshine and rain.</p>
-            <p>Happy Valentine's Day, my love! Here's to many more beautiful moments together.</p>
-            <p style="text-align: right; font-weight: bold; color: #ec4899;">
-                Forever yours,<br>
-                Fana ❤️
-            </p>
-            <button class="yes-btn" onclick="location.reload()">Start Over 💝</button>
-            <button class="yes-btn" style="margin-left: 10px;" onclick="downloadHTML()">Download Page 💌</button>
-        </div>
-    </div>
+const reasons = [
+  "Your kindness knows no bounds",
+  "Your incredible patience",
+  "Your calming presence",
+  "Your beautiful smile",
+  "Your caring heart",
+  "Your intelligence",
+  "Your sense of humor",
+  "Your determination",
+  "Your creativity",
+  "Your thoughtfulness",
+  "Your optimism",
+  "Your resilience",
+  "Your honesty",
+  "Your loyalty",
+  "Your understanding",
+  "Your generosity",
+  "Your compassion",
+  "Your strength",
+  "Your gentleness",
+  "Your wisdom",
+  "Your authenticity",
+  "Your supportiveness",
+  "Your confidence",
+  "Your adaptability",
+  "Your empathy",
+  "Your ambition",
+  "Your reliability",
+  "Your adventurous spirit",
+  "Your positivity",
+  "Your grace under pressure",
+  "Your infectious laughter",
+  "Your nurturing nature",
+  "Your attention to detail",
+  "Your passion for life",
+  "Your good listening skills",
+  "Your dedication",
+  "Your playfulness",
+  "Your emotional intelligence",
+  "Your courage",
+  "Your forgiveness",
+  "Your sense of adventure",
+  "Your humility",
+  "Your trustworthiness",
+  "Your open-mindedness",
+  "Your work ethic",
+  "Your enthusiasm",
+  "Your respectfulness",
+  "Your sense of wonder",
+  "Your maturity",
+  "Your protective nature",
+  "Your ability to inspire",
+  "Your love for learning",
+  "Your sensitivity",
+  "Your charm",
+  "Your consideration",
+  "Your resourcefulness",
+  "Your sincerity",
+  "Your warmth",
+  "Your independence",
+  "Your devotion",
+  "Your spirituality",
+  "Your leadership",
+  "Your imagination",
+  "Your authenticity",
+  "Your dependability",
+  "Your spontaneity",
+  "Your practicality",
+  "Your integrity",
+  "Your cheerfulness",
+  "Your decisiveness",
+  "Your elegance",
+  "Your mindfulness",
+  "Your wit",
+  "Your sweetness",
+  "Your curiosity",
+  "Your willingness to grow",
+  "Your appreciation for life",
+  "Your genuine nature",
+  "Your enthusiasm for new experiences",
+  "Your ability to forgive",
+  "Your emotional depth",
+  "Your loving heart",
+  "Your sense of style",
+  "Your determination",
+  "Your flexibility",
+  "Your perseverance",
+  "Your radiant energy",
+  "Your motivation",
+  "Your faithfulness",
+  "Your artistic side",
+  "Your problem-solving skills",
+  "Your selflessness",
+  "Your confidence",
+  "Your romantic nature",
+  "Your sense of responsibility",
+  "Your ability to comfort",
+  "Your organizational skills",
+  "Your attentiveness",
+  "Your ability to dream big",
+  "Your peaceful nature",
+  "Your inner strength",
+  "Your ability to inspire",
+  "Your unique perspective",
+  "Your loving soul",
+  "Your magnetic personality",
+  "Your ability to make me smile"
+];
 
-    <script>
-        function downloadHTML() {
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'valentine.html';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }
-    </script>
+const memories = [
+  "Our magical first meeting",
+  "Our first shy conversation in person",
+  "That first gentle kiss we shared",
+  "Your first visit to my home",
+  "Our first video call that lasted for hours",
+  "The time we watched that movie together",
+  "Our first dinner date at the restaurant",
+  "Walking hand in hand in the park",
+  "Those cute good morning messages",
+  "Our midnight phone calls",
+  "Sharing food and trying new dishes together",
+  "Taking selfies and creating memories",
+  "Our first surprise gift exchange",
+  "The way you smiled when we first met",
+  "Our first goodbye at the station",
+  "Planning our next meeting while apart",
+  "Sharing songs that remind us of each other",
+  "Our movie date at the cinema",
+  "That peaceful walk in the evening",
+  "Sharing ice cream on a hot day",
+  "Our first fight and making up",
+  "Shopping together and picking clothes",
+  "Those long hugs before departing",
+  "Sending each other random photos throughout the day",
+  "Our first video date",
+  "Falling asleep while on call",
+  "Planning our future together",
+  "Sharing daily updates about our lives",
+  "That time we got caught in the rain",
+  "Our inside jokes that only we understand",
+  "The first time you held my hand",
+  "Celebrating small victories together",
+  "Our virtual dinner dates",
+  "Sending me gifts",
+  "Writing long messages about our day",
+  "Those heart emojis that mean so much",
+  "Supporting each other through tough times",
+  "Our late-night deep conversations",
+  "Sharing funny memes to make each other laugh",
+  "The anticipation before meeting again",
+  "Our first celebration together",
+  "Taking silly pictures together",
+  "Those understanding silences on calls",
+  "Sharing our favorite music",
+  "The excitement of counting days until we meet",
+  "Our first proper date",
+  "That time we got lost but didn't care",
+  "Sharing our childhood stories",
+  "Our first proper hug",
+  "The butterflies before every meeting"
+];
 
-    <script>
-        const noMessages = [
-            "Are you sure? 🥺",
-            "Pretty please? 🥺",
-            "Don't break my heart! 💔",
-            "I'll be so sad... 😢",
-            "Give it another thought! 🙏",
-            "please ende valentine avv 🥺💕",
-            "ende baby alle yes para💔",
-            "da koppe maryadhak yes paranjo🥺"
-        ];
-        let noCount = 0;
+const bucketList = [
+  "Travel to Paris together",
+  "Visit the Maldives",
+  "Explore Venice hand in hand",
+  "Go on a romantic trip to Santorini",
+  "Have a magical wedding",
+  "Start our beautiful family",
+  "Build our dream home",
+  "Go on weekly date nights",
+  "Travel to Switzerland",
+  "Have candlelit dinners",
+  "Dance in the rain together",
+  "Watch northern lights",
+  "Take cooking classes together",
+  "Go stargazing",
+  "Have picnics in the park",
+  "Travel to Japan during cherry blossom season",
+  "Learn a new language together",
+  "Go on a cruise",
+  "Have romantic beach walks",
+  "Create a photo album of our memories",
+  "Plant a garden together",
+  "Take dance lessons",
+  "Go camping under the stars",
+  "Visit every continent together",
+  "Have movie marathons",
+  "Go on spontaneous road trips",
+  "Create holiday traditions",
+  "Write love letters to each other",
+  "Have breakfast in bed",
+  "Watch sunsets at different beaches",
+  "Go hiking together",
+  "Visit Disneyland",
+  "Take a hot air balloon ride",
+  "Go skiing together",
+  "Have regular coffee dates",
+  "Travel to New York",
+  "Create a time capsule",
+  "Go on a safari",
+  "Have rooftop dinners",
+  "Travel to Dubai",
+  "Learn to play an instrument together",
+  "Visit beautiful mosques around the world",
+  "Volunteer at Islamic charity events together",
+  "Have Islamic book reading sessions",
+  "Create a couples bucket list journal",
+  "Go snorkeling together",
+  "Visit waterfalls",
+  "Take art classes together",
+  "Learn Quran together",
+  "Create a nasheed playlist"
+];
 
-        function showMessage() {
-            document.getElementById('question').style.display = 'none';
-            document.getElementById('message').style.display = 'block';
-        }
+interface SuccessScreenProps {
+  width: number;
+  height: number;
+}
 
-        function handleNo() {
-            noCount++;
-            document.getElementById('noMessage').textContent = 
-                noMessages[Math.min(noCount - 1, noMessages.length - 1)];
-        }
+export default function SuccessScreen({ width, height }: SuccessScreenProps) {
+  const [showOptions, setShowOptions] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("reasons");
+  const { setMood } = useMood();
 
-        function moveButton() {
-            const btn = document.getElementById('noBtn');
-            btn.style.transform = `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px)`;
-        }
-    </script>
-</body>
-</html>
+  useEffect(() => {
+    // Show the options after 5 seconds
+    const timer = setTimeout(() => {
+      setShowOptions(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleTabChange = (value: string) => {
+    setSelectedTab(value);
+    setMood(value === "reasons" ? "happy" : "playful");
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        className="text-center w-full max-w-4xl mx-auto px-4"
+      >
+        <AnimatePresence mode="wait">
+          {!showOptions ? (
+            <motion.div
+              key="celebration"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <h1 className="text-5xl md:text-6xl font-bold text-pink-600 mb-4">
+                Yay! 🎉
+              </h1>
+              <p className="text-2xl md:text-3xl text-pink-500">
+                Thank you for making me the happiest babe! ❤️
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="options"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
+                <TabsList className="flex justify-center gap-4 mb-8 bg-pink-50 p-2 rounded-lg">
+                  <TabsTrigger value="reasons" className="data-[state=active]:bg-pink-500 px-6">
+                    <Heart className="mr-2 h-4 w-4" />
+                    Love
+                  </TabsTrigger>
+                  <TabsTrigger value="memories" className="data-[state=active]:bg-pink-500 px-6">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Days
+                  </TabsTrigger>
+                  <TabsTrigger value="bucket-list" className="data-[state=active]:bg-pink-500 px-6">
+                    <List className="mr-2 h-4 w-4" />
+                    Goals
+                  </TabsTrigger>
+                  <TabsTrigger value="message" className="data-[state=active]:bg-pink-500 px-6">
+                    <Heart className="mr-2 h-4 w-4" />
+                    Letter
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="reasons">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      >
+                        {reasons.map((reason, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 0,
+                              transition: { delay: index * 0.1 }
+                            }}
+                            className="flex items-center gap-2 text-pink-600"
+                          >
+                            <Heart className="h-4 w-4 flex-shrink-0" />
+                            <span>{reason}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="memories">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      >
+                        {memories.map((memory, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 0,
+                              transition: { delay: index * 0.1 }
+                            }}
+                            className="flex items-center gap-2 text-pink-600"
+                          >
+                            <Calendar className="h-4 w-4 flex-shrink-0" />
+                            <span>{memory}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="bucket-list">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      >
+                        {bucketList.map((item, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ 
+                              opacity: 1, 
+                              y: 0,
+                              transition: { delay: index * 0.1 }
+                            }}
+                            className="flex items-center gap-2 text-pink-600"
+                          >
+                            <List className="h-4 w-4 flex-shrink-0" />
+                            <span>{item}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="message">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="prose prose-pink max-w-none"
+                      >
+                        <div className="text-pink-600 space-y-4">
+                          <p className="font-medium">To my dearest Jikka,</p>
+                          
+                          <p>I know I'm not able to send you a gift like you did for me this Valentine's, and for that, I'm truly sorry. But I want you to know that this website is my little way of showing you how much I care. I may not have a physical gift to give, but this is me trying, with all my heart, to ask you to be my Valentine.</p>
+                          
+                          <p>You've been so loyal, humble, hardworking, and patient. Every day with you, even though we're miles apart, feels like a blessing. I may be younger than you, but you make me feel like an equal partner in this journey of love and growth. You always put so much effort into everything you do, and it inspires me to keep pushing myself too, both as a person and as a student.</p>
+                          
+                          <p>I wish I could be there with you, especially now, but I promise, even if the miles between us seem long, they will never stop me from loving you more with each passing day. I may not have the means to send you a grand gift, but this is my way of telling you how special you are to me. I promise I will make up for it in every little way I can, and hopefully, soon, we won't be so far apart anymore.</p>
+                          
+                          <p>Thank you for making me feel so loved, so valued, and so cherished. You've shown me what true love means, and I'll forever be grateful for you.</p>
+                          
+                          <p className="mt-8">With all my love,<br/>fana</p>
+                          <button
+                            onClick={() => window.close()}
+                            className="mt-8 px-6 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors"
+                          >
+                            Exit ❤️
+                          </button>
+                        </div>
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </>
+  );
+}
